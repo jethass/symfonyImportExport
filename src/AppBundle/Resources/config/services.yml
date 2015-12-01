@@ -1,0 +1,6 @@
+services:
+    csv_service:
+        class: AppBundle\Services\CSVService
+    excel_service:
+        class: AppBundle\Services\EXCELService
+        arguments: ['@phpexcel']

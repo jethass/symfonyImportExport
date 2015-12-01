@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+ {% block body %}
+   <form action="{{ path('csv_export') }}" method="POST">
+  <button type="submit" name="sumbmit">exporter en csv les Articles</button>
+  </form>
+
+ {% endblock %}

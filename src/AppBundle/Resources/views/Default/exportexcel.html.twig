@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+ {% block body %}
+   <form action="{{ path('excel_export') }}" method="POST">
+  <button type="submit" name="sumbmit">exporter en excel les Articles</button>
+  </form>
+
+ {% endblock %}
