@@ -6,8 +6,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use AppBundle\Entity\Article;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class DefaultController extends Controller {
+class CsvController extends Controller {
 
     /**
      * @Route("/importcsv", name="csv_import")
@@ -58,62 +59,42 @@ class DefaultController extends Controller {
         return $this->render('AppBundle:Default:exportcsv.html.twig');
     }
 
+
     /**
-     * @Route("/importexcel", name="excel_import")
-     */
-    public function importExcelAction() {
-
-        $filename = $this->get('kernel')->getRootDir() . '/../web/excel/test.xls';
-
-        $lignes = $this->get('excel_service')->excel_to_array($filename);
-
+     * @Route("/exportcsvpro", name="export_pro")
+    */
+    public function exportProCSVAction() {
+        $now = new \DateTime('now');
         $em = $this->getDoctrine()->getManager();
-
-        foreach ($lignes as $col) {
-
-            $article = $em->getRepository('AppBundle:Article')->find($col['id']);
-            if (!$article) {
-                $article = new Article();
-                $article->setTitle($col['title']);
-                $article->setContent($col['content']);
-                $article->setUrl($col['url']);
-                $em->persist($article);
-            } else {
-                $article->setTitle($col['title']);
-                $article->setContent($col['content']);
-                $article->setUrl($col['url']);
+        $response = new StreamedResponse();
+        $response->setCallback(
+            function () use ($em) {
+                $normalizer = new ObjectNormalizer();
+                $count = $em->getRepository('AppBundle:Client')->getCount();
+                $total =intval($count[1]);
+                $header = array('NOM', 'PRENOM', 'EMAIL','SEXE');
+                $handle = fopen('php://output', 'r+');
+                fputcsv($handle, $header, ";");
+                $row = 1;
+                while ($total >= 0) {
+                    $clients = $em->getRepository('AppBundle:Client')->findAllClients(($row - 1) * 2, 2);
+                    
+                    foreach ($clients as $key => $obj) {
+                        $clients[$key] = $normalizer->normalize($obj);
+                    }
+                    
+                    foreach ($clients as $client) {
+                        fputcsv($handle, $client, ";");
+                    }
+                    $total=$total-2;
+                    $row++;
+                }
+                fclose($handle);
             }
-            $em->flush();
-        }
-        die;
+        );
+        $response->headers->set('Content-Type', 'application/force-download');
+        $response->headers->set('Content-Disposition', 'attachment; filename="export.csv"');
+        return $response;
     }
-
-    /**
-     * @Route("/exportexcel", requirements={"_format" = "excel"}, name="excel_export")
-     */
-    public function exportExcelAction() {
-        if ($this->getRequest()->getMethod() == "POST") {
-            $normalizer = new ObjectNormalizer();
-
-            $now = new \DateTime();
-            $day = $now->format('d');
-            $month = $now->format('m');
-            $year = $now->format('Y');
-            $date = $day . '-' . $month . '-' . $year;
-
-            $filename = 'export_articles_' . $date . '.xls';
-            $em = $this->getDoctrine()->getManager();
-            $data = $em->getRepository('AppBundle:Article')->findAll();
-
-            foreach ($data as $key => $obj) {
-                $data[$key] = $normalizer->normalize($obj);
-            }
-
-            return $this->get('excel_service')->array_to_excel($data, $filename);
-            die;
-        }
-
-        return $this->render('AppBundle:Default:exportexcel.html.twig');
-    }
-
+    
 }

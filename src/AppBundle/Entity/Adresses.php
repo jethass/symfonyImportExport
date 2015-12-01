@@ -48,6 +48,12 @@ class Adresses
      * @ORM\Column(name="pays", type="string", length=255)
      */
     private $pays;
+    
+    /**
+    * @ORM\ManyToOne(targetEntity="Client", inversedBy="adresses", cascade={"remove"})
+    * @ORM\JoinColumn(name="client_id", referencedColumnName="id")
+    */
+    protected $client;
 
 
     /**
@@ -155,5 +161,28 @@ class Adresses
     {
         return $this->pays;
     }
-}
 
+    /**
+     * Set client
+     *
+     * @param \AppBundle\Entity\Client $client
+     *
+     * @return Adresses
+     */
+    public function setClient(\AppBundle\Entity\Client $client = null)
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    /**
+     * Get client
+     *
+     * @return \AppBundle\Entity\Client
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+}

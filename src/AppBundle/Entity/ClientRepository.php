@@ -12,10 +12,18 @@ class ClientRepository extends \Doctrine\ORM\EntityRepository
 {
     public function findAllClients($offset, $limit){
          return $this->createQueryBuilder('d')
-              ->select('d.nom, d.prenom, d., d.email, d.naissance, d.sexe')
+              ->select('d')
               ->getQuery()
               ->setFirstResult( $offset )
               ->setMaxResults( $limit )
               ->getResult();
+    }
+    
+    public function getCount(){
+        return $this->createQueryBuilder('d')
+              ->select('count(d.id)')
+              ->getQuery()
+              ->getSingleResult();
+                  
     }
 }

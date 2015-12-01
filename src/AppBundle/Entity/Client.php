@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Client
 {
+    
     /**
      * @var integer
      *
@@ -43,18 +44,21 @@ class Client
     private $email;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="naissance", type="date")
-     */
-    private $naissance;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="sexe", type="string", length=15)
      */
     private $sexe;
+    
+    /**
+    * @ORM\OneToMany(targetEntity="Adresses", mappedBy="client", cascade={"remove", "persist"})
+    */
+    private $adresses;
+    
+    public function __construct(){ 
+        $this->adresses = new \Doctrine\Common\Collections\ArrayCollection();
+        
+    }
 
 
     /**
@@ -139,31 +143,7 @@ class Client
         return $this->email;
     }
 
-    /**
-     * Set naissance
-     *
-     * @param \DateTime $naissance
-     *
-     * @return Client
-     */
-    public function setNaissance($naissance)
-    {
-        $this->naissance = $naissance;
-
-        return $this;
-    }
-
-    /**
-     * Get naissance
-     *
-     * @return \DateTime
-     */
-    public function getNaissance()
-    {
-        return $this->naissance;
-    }
-
-    /**
+     /**
      * Set sexe
      *
      * @param string $sexe
@@ -186,5 +166,38 @@ class Client
     {
         return $this->sexe;
     }
-}
 
+    /**
+     * Add adress
+     *
+     * @param \AppBundle\Entity\Adresses $adress
+     *
+     * @return Client
+     */
+    public function addAdress(\AppBundle\Entity\Adresses $adress)
+    {
+        $this->adresses[] = $adress;
+
+        return $this;
+    }
+
+    /**
+     * Remove adress
+     *
+     * @param \AppBundle\Entity\Adresses $adress
+     */
+    public function removeAdress(\AppBundle\Entity\Adresses $adress)
+    {
+        $this->adresses->removeElement($adress);
+    }
+
+    /**
+     * Get adresses
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAdresses()
+    {
+        return $this->adresses;
+    }
+}
