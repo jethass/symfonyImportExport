@@ -1,0 +1,46 @@
+Class Client
+{
+     /**
+     * @ORM\ManyToMany(targetEntity="Produit", inversedBy="clients", cascade={"persist", "remove"})
+     * @ORM\JoinTable(name="Acheter",
+     *   joinColumns={@ORM\JoinColumn(name="Client_idClient", referencedColumnName="id")},
+     *   inverseJoinColumns={@ORM\JoinColumn(name="Produit_idProduit", referencedColumnName="id")}
+     * )
+     */
+    private $produits;
+	
+	 public function __construct()
+    {
+        $this->produits = new ArrayCollection();
+    }
+	
+}
+
+Class Produit
+{
+
+     /**
+     * @ORM\ManyToMany(targetEntity="Client", mappedBy="produits", cascade={"persist"})
+     */
+    private $clients;
+	public function __construct()
+    {
+        $this->clients = new ArrayCollection();
+    }
+}
+
+$client1 = new Client();
+$client1->setNom("client1");
+$client2 = new Client();
+$client2->setNom("client2");
+ 
+$produit1 = new Produit();
+$produit1->setNom("produit1");
+$produit2 = new Produit();
+$produit2->setNom("produit2");
+ 
+$produit1->setClients(array($client1, $client2));
+$client1->addProduit($produit1);
+ 
+$this->getDoctrine()->getEntityManager()->persist($produit1);
+$this->getDoctrine()->getEntityManager()->flush();
